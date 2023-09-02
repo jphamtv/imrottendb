@@ -1,0 +1,33 @@
+<!-- templates/search.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+Search Results
+{% endblock title %}
+
+{% block content %}
+<div class="search-list-container">
+  {% if search_results %}
+  <ul>
+    {% for item in search_results %}
+    <li class="search-result-item">
+      <a href="/details/{{ item.tmdb_id }}/{{ item.media_type }}" class="search-result-item-link">
+        <div class="search-result-wrapper">
+          <img src="{{ item.poster_img }}" alt="{{ item.title }}" class="poster-image">
+          <div class="title-details-wrapper">
+            <h3>{{ item.title }}</h3>
+            {% if item.year %}
+            <p>{{ item.year }}</p>
+            {% endif %}
+            <p>{{ item.media_type }}</p>
+          </div>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif not search_results %}
+  <p class="error-message">No movies or TV shows found. Please check the spelling and try again.</p>
+  {% endif %}
+</div>
+{% endblock content %}

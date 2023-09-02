@@ -1,0 +1,183 @@
+<!-- templates/details.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+{{ details.title }}
+{% endblock title %}
+
+{% block content %}
+
+<div class="title-details-container">
+  <img src="{{ details.poster_img }}" alt="{{ details.title }}" class="poster-image">
+  {% if media_type == 'Movie' %}
+  <div class="title-details-wrapper">
+    <h3>{{ details.title }}</h3>
+    {% if details.certifcation and details.runtime %}
+    <div><span class='certification'>{{ details.certifcation }}</span>{{ details.year }} • {{ details.runtime }}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    {% elif details.runtime and not details.certification %}
+    <div>{{ details.year }} • {{ details.runtime }}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    {% else %}
+    <div>{{ details.year }}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    {% endif %}
+    {% if commonsense_info %}
+    <a href="{{ commonsense_info['url'] }}" target="_blank">
+      <div class="commonsense-wrapper">
+        <img src="/static/img/logo-checkmark-green.svg" class="commonsense-icon">
+        <div>
+          {{ commonsense_info['rating'] }}
+        </div>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+  {% elif media_type == 'TV' %}
+  <div class="title-details-wrapper">
+    <h3>{{ details.title }}</h3>
+    <p>{{ details.year }}</p>
+    {% if details.creator %}
+    <p>Creator: {{ details.creator[0] }}{% if details.creator[1] %}<span>, {{ details.creator[1]}}</span>{% endif %}</p>
+    {% endif %}
+    {% if commonsense_info %}
+    <a href="{{ commonsense_info['url'] }}" target="_blank">
+      <div class="commonsense-wrapper">
+        <img src="/static/img/logo-checkmark-green.svg" class="commonsense-icon">
+        <div>
+          {{ commonsense_info['rating'] }}
+        </div>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% if rottentomatoes_url %}
+<a href="{{ rottentomatoes_url }}" target="_blank">
+  <div class="rottentomatoes-container card">
+    <div class="tomatometer-wrapper">
+      <div class="rating-box-wrapper">
+        {% if rottentomatoes_scores.tomatometer_state == 'certified-fresh' %}
+        <img src="/static/img/certified_fresh.svg" class="rating-image">
+        {% elif rottentomatoes_scores.tomatometer_state == 'fresh' %}
+        <img src="/static/img/tomatometer-fresh.svg" class="rating-image">
+        {% elif rottentomatoes_scores.tomatometer_state == 'rotten' %}
+        <img src="/static/img/tomatometer-rotten.svg" class="rating-image">
+        {% else %}
+        <img src="/static/img/tomatometer-empty.svg" class="rating-image">
+        {% endif %}
+        {% if rottentomatoes_scores.tomatometer %}
+        <p class="rating">{{ rottentomatoes_scores.tomatometer }}</p>
+        {% else %}
+        <p class="no_rating">--</p>
+        {% endif %}
+      </div>
+      <p class="label">Tomatometer</p>
+    </div>
+    <div class="audiencescore-wrapper">
+      <div class="rating-box-wrapper">
+        {% if rottentomatoes_scores.audience_state == 'upright' %}
+        <img src="/static/img/aud_score-fresh.svg" class="rating-image">
+        {% elif rottentomatoes_scores.audience_state == 'spilled' %}
+        <img src="/static/img/aud_score-rotten.svg" class="rating-image">
+        {% else %}
+        <img src="/static/img/aud_score-empty.svg" class="rating-image">
+        {% endif %}
+        {% if rottentomatoes_scores.audience_score %}
+        <p class="rating">{{ rottentomatoes_scores.audience_score }}</p>
+        {% else %}
+        <p class="no_rating">--</p>
+        {% endif %}
+      </div>
+      <p class="label">Audience Score</p>
+    </div>
+  </div>
+</a>
+{% endif %}
+
+<div class="ratings-container">
+
+  <a href="{{ imdb_url }}" target="_blank">
+    <div class="imdb-wrapper card">
+      <div class="rating-box-wrapper">
+        {% if imdb_rating %}
+        <img src="/static/img/star.svg" class="rating-image">
+        <p class="rating">{{ imdb_rating }}<span class="rating-scale">/10</span></p>
+        {% else %}
+        <img src="/static/img/star-empty.svg" class="rating-image">
+        <p class="no_rating">--</p>
+        {% endif %}
+      </div>
+      <p class="label">IMDb Rating</p>
+    </div>
+  </a>
+
+  {% if letterbxd_url %}
+  <a href="{{ letterbxd_url }}" target="_blank">
+    <div class="letterbxd-wrapper card">
+      <div class="rating-box-wrapper">
+        {% if letterbxd_rating %}
+        <p class="rating">{{ letterbxd_rating }}<span class="rating-scale">/5</span></p>
+        {% else %}
+        <p class="no_rating">--</p>
+        {% endif %}
+      </div>
+      <p class="label">Letterbxd Rating</p>
+    </div>
+  </a>
+  {% endif %}  
+</div>
+
+{% if media_type == 'Movie' %}
+{% if box_office_amounts[0] != '–' and box_office_amounts[1] != '–' and box_office_amounts[2] != '–'%}
+<div class="box-office-container">
+  <a href="{{ boxofficemojo_url }}" target="_blank">
+    <div class="box-office-wrapper card">
+      {% if box_office_amounts[0] != '–' %}
+      <div>
+        <p class="box-office-rating">{{ box_office_amounts[0] }}</p>
+        <p class="label-box-office">Domestic</p>
+      </div>
+      {% endif %}
+      {% if box_office_amounts[1] != '–' %}
+      <div>
+        <p class="box-office-rating">{{ box_office_amounts[1] }}</p>
+        <p class="label-box-office">International</p>
+      </div>
+      {% endif %}
+      {% if box_office_amounts[0] != '–' and box_office_amounts[1] != '–' %}
+      <div>
+        <p class="box-office-rating">{{ box_office_amounts[2] }}</p>
+        <p class="label-box-office">Worldwide</p>
+      </div>
+    </div>
+  </a>
+  {% endif %}
+{% endif %}
+{% endif %}
+</div>
+
+<div class="button-container">
+  {% if details.justwatch_url %}
+    {% if justwatch_page %}
+    <a href="{{ justwatch_page }}" target="_blank">
+      <div class="justwatch-button">
+        <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
+        <span>Where to Rent or Stream</span>
+      </div>
+    </a>
+    {% else %}
+    <a href="{{ details.justwatch_url }}" target="_blank">
+      <div class="justwatch-button">
+        <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
+        <span>Where to Rent or Stream</span>
+      </div>
+    </a>
+    {% endif %}
+  {% endif %}
+  <a href="{{ url_for('search') }}" class="button btn-margin">Back to Results</a>
+</div>
+
+{% endblock content %}

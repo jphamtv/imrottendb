@@ -1,0 +1,48 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/static/img/favicon/site.webmanifest">
+  <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+  <script src="/static/js/javascript.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <a href="/"><img src="/static/img/logo.png" class="logo"></a>
+  </header>
+
+  <div class="search-container">
+    <form method="POST" action="/search">
+      <div class="search-wrapper">
+        <input type="text" name="title" placeholder="Search Movies & TV" class="search-field" required>
+        <button type="button" class="clear-button">&times;</button>
+      </div>
+      <!-- <input type="submit" value="Search" class="button"> -->
+    </form>
+  </div>
+  <main>
+      <!-- <form method="POST" action="/search">
+        <input type="text" name="title" placeholder="Enter a Movie or TV show" class="input-field" required
+          autofocus>
+        <input type="submit" value="Search" class="button">
+      </form> -->
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <!-- Footer content -->
+    <p>© 2023 IMRottenDb Ratings</p>
+    <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+  </footer>
+
+</body>
+
+</html>
