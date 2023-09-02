@@ -114,24 +114,24 @@
     </div>
   </a>
 
-  {% if letterbxd_url %}
-  <a href="{{ letterbxd_url }}" target="_blank">
+  {% if letterboxd_url %}
+  <a href="{{ letterboxd_url }}" target="_blank">
     <div class="letterbxd-wrapper card">
       <div class="rating-box-wrapper">
-        {% if letterbxd_rating %}
-        <p class="rating">{{ letterbxd_rating }}<span class="rating-scale">/5</span></p>
+        {% if letterboxd_rating %}
+        <p class="rating">{{ letterboxd_rating }}<span class="rating-scale">/5</span></p>
         {% else %}
         <p class="no_rating">--</p>
         {% endif %}
       </div>
-      <p class="label">Letterbxd Rating</p>
+      <p class="label">Letterboxd Rating</p>
     </div>
   </a>
   {% endif %}  
 </div>
 
 {% if media_type == 'Movie' %}
-{% if box_office_amounts[0] != '–' and box_office_amounts[1] != '–' and box_office_amounts[2] != '–'%}
+{% if box_office_amounts and box_office_amounts[2] != '–'%}
 <div class="box-office-container">
   <a href="{{ boxofficemojo_url }}" target="_blank">
     <div class="box-office-wrapper card">
@@ -159,9 +159,9 @@
 {% endif %}
 </div>
 
+{% if details.justwatch_url %}
+{% if justwatch_page %}
 <div class="button-container">
-  {% if details.justwatch_url %}
-    {% if justwatch_page %}
     <a href="{{ justwatch_page }}" target="_blank">
       <div class="justwatch-button">
         <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
@@ -177,7 +177,6 @@
     </a>
     {% endif %}
   {% endif %}
-  <a href="{{ url_for('search') }}" class="button btn-margin">Back to Results</a>
 </div>
 
 {% endblock content %}
