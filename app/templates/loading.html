@@ -1,0 +1,25 @@
+<!-- loading.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+Loading…
+{% endblock title %}
+
+{% block content %}
+<div id="loading">
+  <p>Loading...</p>
+</div>
+
+<script>
+  // Execute when the page is fully loaded
+  window.addEventListener('load', async function() {
+      // Fetch data from FastAPI
+      const response = await fetch(`/details/${tmdb_id}/${media_type}/`);
+      const data = await response.json();
+
+      // Redirect to details page and populate it
+      window.location.href = `/details/${tmdb_id}/${media_type}/`;
+  });
+</script>
+
+{% endblock content %}

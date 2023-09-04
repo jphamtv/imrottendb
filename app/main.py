@@ -55,7 +55,7 @@ def search(request: Request, title: str = Form(None)):
     session = request.session
     search_results = []
 
-    # Search for movie or TV show titles
+    # Fetch movie and TV shows if title is valid
     if title:
         user_input = title.strip()
         if user_input:
@@ -63,11 +63,15 @@ def search(request: Request, title: str = Form(None)):
             search_results = search_title(user_input)
             # Store the results in session
             session["search_results"] = search_results
+
     elif "search_results" in session:
         # Use session when going back via "Back to Results" button
         search_results = session["search_results"]
 
-    return templates.TemplateResponse("search.html", {"request": request, "search_results": search_results})
+    return templates.TemplateResponse("search.html", {
+        "request": request, 
+        "search_results": search_results,
+    })
 
 
 @app.get("/details/{tmdb_id}/{media_type}/")
@@ -77,7 +81,7 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
     # Start timer
     start_time0 = time.time()
 
-    # Call TBMD API and get title details
+    # Fetch title details from TBMD API 
     details = get_title_details(tmdb_id, media_type, TMDB_API_KEY)
     title = details["title"]
     year = details["year"]
@@ -85,70 +89,55 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
     imdb_url = f"https://www.imdb.com/title/{imdb_id}"
     justwatch_url = details["justwatch_url"]
 
-
-    # imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
-    # boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id)) if media_type == "Movie" else None
-    # box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id)) if media_type == "Movie" else None
-    # commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
-    # justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url)) if justwatch_url else None
-    # rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
-    # letterboxd_url = asyncio.create_task(get_letterboxd_url(title, year)) if media_type == "Movie" else None
-
-
-    # imdb_rating = await imdb_rating
-    # boxofficemojo_url = await boxofficemojo_url
-    # box_office_amounts = await box_office_amounts
-    # commonsense_info = await commonsense_info
-    # justwatch_page = await justwatch_page
-    # rottentomatoes_url = await rottentomatoes_url
-    # letterboxd_url = await letterboxd_url
-
-    # rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
-    # letterboxd_rating = asyncio.create_task(get_letterboxd_rating(letterboxd_url))  if media_type == "Movie" else None
-
-    # rottentomatoes_scores = await rottentomatoes_scores
-    # letterboxd_rating = await letterboxd_rating
-
+    # Movie specific tasks
     if media_type == "Movie":
-        imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
+
+        # Initialize async tasks
         boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id)) 
-        box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id)) 
-        commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
-        justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
         rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
         letterboxd_url = asyncio.create_task(get_letterboxd_url(title, year))
+        justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
+        box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id)) 
+        imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
+        commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
 
-        # Wait for the completion of the tasks
+        # Await Rottentomatoes task and fetch scores immediately after URL is fetched
+        rottentomatoes_url = await rottentomatoes_url
+        rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
+
+        # Await Letterboxd URL task and fetch rating immediately after URL is fetched
+        letterboxd_url = await letterboxd_url
+        letterboxd_rating = asyncio.create_task(get_letterboxd_rating(letterboxd_url))
+        
+        # Await tasks
         imdb_rating = await imdb_rating
         boxofficemojo_url = await boxofficemojo_url
         box_office_amounts = await box_office_amounts
         commonsense_info = await commonsense_info
         justwatch_page = await justwatch_page if justwatch_url else None
-        rottentomatoes_url = await rottentomatoes_url
-        letterboxd_url = await letterboxd_url
-
-        rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
-        letterboxd_rating = asyncio.create_task(get_letterboxd_rating(letterboxd_url))
-
-        # Wait for the completion of the tasks
         rottentomatoes_scores = await rottentomatoes_scores
         letterboxd_rating = await letterboxd_rating
 
+    # TV show specific tasks
     elif media_type == "TV":
-        imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))      
-        commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
-        justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url)) if justwatch_url else None
-        rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
 
-        # Wait for the completion of the tasks
+        # Initialize async tasks
+        justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
+        rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
+        imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))   
+        commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
+
+        # Await Rottentomatoes task and fetch scores immediately after URL is fetched
+        rottentomatoes_url = await rottentomatoes_url
+        rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
+
+        # Await tasks
         imdb_rating = await imdb_rating
         commonsense_info = await commonsense_info
-        justwatch_page = await justwatch_page
-        rottentomatoes_url = await rottentomatoes_url
-
-        rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
+        justwatch_page = await justwatch_page if justwatch_url else None
         rottentomatoes_scores = await rottentomatoes_scores
 
+        # Set variables to 'None' so they don't display on the page
         letterboxd_url = None
         letterboxd_rating = None
         boxofficemojo_url = None
@@ -159,9 +148,7 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
     execution_time0 = end_time0 - start_time0
     print(f"Total: {execution_time0}")
 
-
-    return templates.TemplateResponse(
-        "details.html", {
+    return templates.TemplateResponse("details.html", {
         "request": request,
         "details": details,
         "imdb_url": imdb_url,
@@ -178,6 +165,9 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
     })
 
 
+@app.get("/loading/")
+async def loading(request: Request):
+    return templates.TemplateResponse("loading.html", {"request": request})
 
 
 
