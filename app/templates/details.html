@@ -23,7 +23,7 @@
     <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
     {% endif %}
     {% if commonsense_info %}
-    <a href="{{ commonsense_info['url'] }}" target="_blank">
+    <a href="{{ commonsense_info['url'] }}" target="_blank" rel="noopener noreferrer">
       <div class="commonsense-wrapper">
         <img src="/static/img/logo-checkmark-green.svg" class="commonsense-icon">
         <div>
@@ -41,7 +41,7 @@
     <p>Creator: {{ details.creator[0] }}{% if details.creator[1] %}<span>, {{ details.creator[1]}}</span>{% endif %}</p>
     {% endif %}
     {% if commonsense_info %}
-    <a href="{{ commonsense_info['url'] }}" target="_blank">
+    <a href="{{ commonsense_info['url'] }}" target="_blank" rel="noopener noreferrer">
       <div class="commonsense-wrapper">
         <img src="/static/img/logo-checkmark-green.svg" class="commonsense-icon">
         <div>
@@ -55,7 +55,7 @@
 </div>
 
 {% if rottentomatoes_url %}
-<a href="{{ rottentomatoes_url }}" target="_blank">
+<a href="{{ rottentomatoes_url }}" target="_blank" rel="noopener noreferrer">
   <div class="rottentomatoes-container card">
     <div class="tomatometer-wrapper">
       <div class="rating-box-wrapper">
@@ -99,7 +99,7 @@
 
 <div class="ratings-container">
 
-  <a href="{{ imdb_url }}" target="_blank">
+  <a href="{{ imdb_url }}" target="_blank" rel="noopener noreferrer">
     <div class="imdb-wrapper card">
       <div class="rating-box-wrapper">
         {% if imdb_rating %}
@@ -115,7 +115,7 @@
   </a>
 
   {% if letterboxd_url %}
-  <a href="{{ letterboxd_url }}" target="_blank">
+  <a href="{{ letterboxd_url }}" target="_blank" rel="noopener noreferrer">
     <div class="letterbxd-wrapper card">
       <div class="rating-box-wrapper">
         {% if letterboxd_rating %}
@@ -133,7 +133,7 @@
 {% if media_type == 'Movie' %}
 {% if box_office_amounts and box_office_amounts[2] != '–'%}
 <div class="box-office-container">
-  <a href="{{ boxofficemojo_url }}" target="_blank">
+  <a href="{{ boxofficemojo_url }}" target="_blank" rel="noopener noreferrer">
     <div class="box-office-wrapper card">
       {% if box_office_amounts[0] != '–' %}
       <div>
@@ -152,31 +152,37 @@
         <p class="box-office-rating">{{ box_office_amounts[2] }}</p>
         <p class="label-box-office">Worldwide</p>
       </div>
+      {% endif %}
+    </div>
+  </a>
+</div>
+{% endif %}
+{% endif %}
+
+<div class="button-container">
+  {% if details.justwatch_url %}
+  {% if justwatch_page %}
+  <a href="{{ justwatch_page }}" target="_blank" rel="noopener noreferrer">
+    <div class="justwatch-button">
+      <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
+      <span>Where to Rent or Stream</span>
+    </div>
+  </a>
+  {% else %}
+  <a href="{{ details.justwatch_url }}" target="_blank" rel="noopener noreferrer">
+    <div class="justwatch-button">
+      <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
+      <span>Where to Rent or Stream</span>
     </div>
   </a>
   {% endif %}
-{% endif %}
-{% endif %}
+  {% endif %}
+  <a href="{{ url_for('search') }}">
+    <div class="button">
+      <span>Back to Results</span>
+    </div>
+  </a>
 </div>
 
-{% if details.justwatch_url %}
-{% if justwatch_page %}
-<div class="button-container">
-    <a href="{{ justwatch_page }}" target="_blank">
-      <div class="justwatch-button">
-        <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
-        <span>Where to Rent or Stream</span>
-      </div>
-    </a>
-    {% else %}
-    <a href="{{ details.justwatch_url }}" target="_blank">
-      <div class="justwatch-button">
-        <img src="/static/img/justwatch-small-black.svg" class="justwatch-icon">
-        <span>Where to Rent or Stream</span>
-      </div>
-    </a>
-    {% endif %}
-  {% endif %}
-</div>
 
 {% endblock content %}

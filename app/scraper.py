@@ -1,9 +1,8 @@
 # scraping.py
-import asyncio
 import httpx
-import requests
 import time
 from bs4 import BeautifulSoup
+from unidecode import unidecode
 
 
 BASE_URLS = {
@@ -41,8 +40,10 @@ async def make_request(url, headers=None):
 
 async def get_rottentomatoes_url(title, year, media_type):
     start_time = time.time()
+    title = unidecode(title)
     year = year[:4]
     search_url = f"{BASE_URLS['rottentomatoes']}{title.replace(' ', '%20')}"
+    print(f'rt_url: {search_url}')
     soup = await make_request(search_url, HEADERS)
     search_result = soup.find(
         "search-page-media-row",

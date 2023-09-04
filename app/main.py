@@ -168,6 +168,3 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
 @app.get("/loading/")
 async def loading(request: Request):
     return templates.TemplateResponse("loading.html", {"request": request})
-
-
-

@@ -7,19 +7,36 @@ Loading…
 
 {% block content %}
 <div id="loading">
-  <p>Loading...</p>
+  <p class="loading">Loading...</p>
 </div>
 
 <script>
-  // Execute when the page is fully loaded
-  window.addEventListener('load', async function() {
-      // Fetch data from FastAPI
-      const response = await fetch(`/details/${tmdb_id}/${media_type}/`);
-      const data = await response.json();
+const fetchData = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tmdb_id = urlParams.get('tmdb_id');
+    const media_type = urlParams.get('media_type');
 
-      // Redirect to details page and populate it
-      window.location.href = `/details/${tmdb_id}/${media_type}/`;
-  });
+    // Construct the details URL using the parameters
+    const detailsUrl = `/details/${tmdb_id}/${media_type}/`;
+
+    try {
+        const response = await fetch(detailsUrl);
+        
+        // Only check if the request is successful, don't attempt to parse JSON
+        if (response.ok) {
+            window.location.href = detailsUrl; // Navigate to the details page
+        } else {
+            console.error(`Fetch failed with status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('There was a problem fetching the data:', error);
+    }
+};
+
+if (window.location.pathname === '/loading/') {
+    fetchData();
+}
+
 </script>
 
 {% endblock content %}

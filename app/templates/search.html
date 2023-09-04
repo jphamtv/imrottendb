@@ -6,11 +6,12 @@ Search Results
 {% endblock title %}
 
 {% block content %}
-<div class="search-list-container">
+<div class="search-list-container" id="results">
   {% if search_results %}
   <ul>
     {% for item in search_results %}
     <li class="search-result-item">
+      <!-- <a href="/loading?tmdb_id={{ item.tmdb_id }}&media_type={{ item.media_type }}" class="search-result-item-link"> -->
       <a href="/details/{{ item.tmdb_id }}/{{ item.media_type }}" class="search-result-item-link">
         <div class="search-result-wrapper">
           <img src="{{ item.poster_img }}" alt="{{ item.title }}" class="poster-image">
@@ -31,5 +32,19 @@ Search Results
   {% endif %}
 </div>
 
+<div id="loading" style="display: none">
+  <div class="title-details-container">
+    <div class="empty-state-poster"></div>
+    <div class="title-details-wrapper">
+      <div class="empty-state-info"></div>
+      <div class="empty-state-info"></div>
+      <div class="empty-state-info"></div>
+    </div>    
+  </div>
+  <div class="rottentomatoes-container card empty-state-card">
+  </div>
+  <div class="rottentomatoes-container card empty-state-card">
+  </div>  
+</div>
 
 {% endblock content %}
