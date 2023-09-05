@@ -6,7 +6,6 @@
 {% endblock title %}
 
 {% block content %}
-
 <div class="title-details-container">
   <img src="{{ details.poster_img }}" alt="{{ details.title }}" class="poster-image">
   {% if media_type == 'Movie' %}
@@ -98,7 +97,6 @@
 {% endif %}
 
 <div class="ratings-container">
-
   <a href="{{ imdb_url }}" target="_blank" rel="noopener noreferrer">
     <div class="imdb-wrapper card">
       <div class="rating-box-wrapper">
@@ -110,7 +108,7 @@
         <p class="no_rating">--</p>
         {% endif %}
       </div>
-      <p class="label">IMDb Rating</p>
+      <p class="label">IMDb</p>
     </div>
   </a>
 
@@ -124,7 +122,7 @@
         <p class="no_rating">--</p>
         {% endif %}
       </div>
-      <p class="label">Letterboxd Rating</p>
+      <p class="label">Letterboxd</p>
     </div>
   </a>
   {% endif %}  
@@ -183,6 +181,4 @@
     </div>
   </a>
 </div>
-
-
 {% endblock content %}

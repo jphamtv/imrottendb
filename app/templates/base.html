@@ -1,11 +1,13 @@
 <!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <title>{% block title %}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,700;9..40,900&display=swap" rel="stylesheet">
   <link rel="apple-touch-icon" sizes="180x180" href="/static/img/favicon/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon/favicon-16x16.png">
@@ -16,7 +18,7 @@
 
 <body>
   <header>
-    <a href="/"><img src="/static/img/logo.png" class="logo"></a>
+    <a href="/"><img src="/static/img/logo_yellow.svg" class="logo"></a>
   </header>
 
   <div class="search-container">
@@ -34,10 +36,8 @@
 
   <footer>
     <!-- Footer content -->
-    <p>© 2023 IMRottenDb Ratings</p>
-    <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+    <p>© 2023 ReelRatingsDb</p>
+    <p>This application is for demonstration purposes only and is not intended for commercial use. It utilizes data from the TMDb API and various third-party sources, but is not endorsed or certified by TMDb or any of the third-parties. All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</p>
   </footer>
-
 </body>
-
 </html>

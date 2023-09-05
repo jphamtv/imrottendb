@@ -1,15 +1,10 @@
 # main.py
 import asyncio
-import time
+
 from environs import Env
-
-# Loads environment variables
-env = Env()
-env.read_env()
-
-TMDB_API_KEY = env.str("TMDB_API_KEY")
-SESSION_SECRET_KEY = env.str("SESSION_SECRET_KEY")
-
+from fastapi import FastAPI, Form, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from scraper import (
     get_imdb_rating,
     get_rottentomatoes_url,
@@ -21,13 +16,15 @@ from scraper import (
     get_box_office_amounts,
     get_justwatch_page,
 )
+from starlette.middleware.sessions import SessionMiddleware
 from tmdb import get_title_details, search_title
 
-from fastapi import FastAPI, Form, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+# Loads environment variables
+env = Env()
+env.read_env()
 
-from starlette.middleware.sessions import SessionMiddleware
+TMDB_API_KEY = env.str("TMDB_API_KEY")
+SESSION_SECRET_KEY = env.str("SESSION_SECRET_KEY")
 
 app = FastAPI()
 
@@ -61,12 +58,16 @@ def search(request: Request, title: str = Form(None)):
         if user_input:
             # Get results via TMDB API
             search_results = search_title(user_input)
-            # Store the results in session
-            session["search_results"] = search_results
+            print("Before update: ", session.get("search_results", "No results"))
+            session.pop("search_results", None)  # Remove older results, if exist
+            session["search_results"] = search_results  # Store the results in session
+            print("After update: ", session.get("search_results", "No results"))
 
     elif "search_results" in session:
         # Use session when going back via "Back to Results" button
+        print("Before update ELIF: ", session.get("search_results", "No results"))
         search_results = session["search_results"]
+        print("After update ELIF: ", session.get("search_results", "No results"))
 
     return templates.TemplateResponse("search.html", {
         "request": request, 
@@ -76,10 +77,7 @@ def search(request: Request, title: str = Form(None)):
 
 @app.get("/details/{tmdb_id}/{media_type}/")
 async def title_details(request: Request, tmdb_id: str, media_type: str):
-    """Show selected title details"""
-    
-    # Start timer
-    start_time0 = time.time()
+    """Show selected title details and ratings"""
 
     # Fetch title details from TBMD API 
     details = get_title_details(tmdb_id, media_type, TMDB_API_KEY)
@@ -143,11 +141,6 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
         boxofficemojo_url = None
         box_office_amounts = None
 
-    # End timer and return total
-    end_time0 = time.time()
-    execution_time0 = end_time0 - start_time0
-    print(f"Total: {execution_time0}")
-
     return templates.TemplateResponse("details.html", {
         "request": request,
         "details": details,
@@ -164,7 +157,6 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
         "justwatch_page": justwatch_page,   
     })
 
-
-@app.get("/loading/")
-async def loading(request: Request):
-    return templates.TemplateResponse("loading.html", {"request": request})
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
