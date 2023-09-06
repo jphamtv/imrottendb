@@ -1,4 +1,4 @@
-# IMRottenDb v3
+# ReelRatingsDb
 
 Quickly lookup ratings for Movies & TV series.
 
