@@ -24,7 +24,7 @@
   <div class="search-container">
     <form method="POST" action="/search">
       <div class="search-wrapper">
-        <input type="text" name="title" placeholder="Search Movies & TV" class="search-field" required>
+        <input type="text" name="title" placeholder="Search Movies & TV" class="search-field" value="{{ title }}" required>
         <button type="button" class="clear-button">&times;</button>
       </div>
     </form>
@@ -36,7 +36,7 @@
 
   <footer>
     <!-- Footer content -->
-    <p>© 2023 ReelRatingsDb</p>
+    <p>© 2023 ReelRatingsDB</p>
     <p>This application is for demonstration purposes only and is not intended for commercial use. It utilizes data from the TMDb API and various third-party sources, but is not endorsed or certified by TMDb or any of the third-parties. All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.</p>
   </footer>
 </body>

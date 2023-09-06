@@ -1,11 +1,13 @@
 # main.py
 import asyncio
+import logging
+import time
 
 from environs import Env
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from scraper import (
+from .scraper import (
     get_imdb_rating,
     get_rottentomatoes_url,
     get_rottentomatoes_scores,
@@ -17,7 +19,7 @@ from scraper import (
     get_justwatch_page,
 )
 from starlette.middleware.sessions import SessionMiddleware
-from tmdb import get_title_details, search_title
+from .tmdb import get_title_details, search_title
 
 # Initialize environment variables
 env = Env()
@@ -29,18 +31,17 @@ SESSION_SECRET_KEY = env.str("SESSION_SECRET_KEY")
 # Initialize FastAPI app
 app = FastAPI()
 
-# Add session middleware
-app.add_middleware(
-    SessionMiddleware, 
-    secret_key=SESSION_SECRET_KEY, 
-    max_age=None
-)
-
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Initialize template engine
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
+
+
+@app.exception_handler(Exception)
+async def internal_server_error(request: Request, exc: Exception):
+    logging.error(f"An error occurred: {exc}")
+    return templates.TemplateResponse("500_error.html", {"request": request}, status_code=500)
 
 
 @app.get("/")
@@ -53,24 +54,20 @@ def index(request: Request):
 @app.post("/search")
 def search(request: Request, title: str = Form(None)):
     """Search for a movie or TV show and display the results"""
-    session = request.session
     search_results = []
 
-    if title:
-        user_input = title.strip()
-        if user_input:
-            # Fetch search results
-            search_results = search_title(user_input)
-            session.pop("search_results", None) 
-            session["search_results"] = search_results 
-
-    elif "search_results" in session:
-        # Use cached results when navigating back
-        search_results = session["search_results"]
+    try:
+        if title:
+            user_input = title.strip()
+            if user_input:
+                search_results = search_title(user_input)
+    except Exception:
+            raise HTTPException(status_code=500)
 
     return templates.TemplateResponse("search.html", {
         "request": request, 
         "search_results": search_results,
+        "title": title,
     })
 
 
@@ -104,7 +101,10 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
 
 
 async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str):
-    """Execute asynchronous tasks specifically for TV shows."""
+    """Execute asynchronous tasks specifically for movies."""
+
+    start_time = time.time()
+
     # Initialize tasks
     boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id)) 
     rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
@@ -130,6 +130,10 @@ async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: s
     justwatch_page = await justwatch_page if justwatch_url else None
     rottentomatoes_scores = await rottentomatoes_scores
     letterboxd_rating = await letterboxd_rating
+
+    end_time = time.time()
+    elapsed_time = round(end_time - start_time, 3)
+    print(f'Original method: {elapsed_time}')
 
     return {
         "imdb_rating": imdb_rating,

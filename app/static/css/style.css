@@ -137,7 +137,7 @@ footer {
 }
 
 footer p {
-  margin-bottom: 5px;
+  text-align: center;
 }
 
 .poster-image {
@@ -286,6 +286,19 @@ footer p {
   margin: 0 1rem;
 }
 
+
+.error-container {
+  display: flex;
+  margin: 1rem;
+}
+
+.error-image {
+  display: flex;
+  max-width: 100%;
+  margin: 1rem auto;
+  box-sizing: border-box;
+}
+
 .search-result-item {
   border-bottom: 1px solid #ddd;
 }
@@ -306,7 +319,7 @@ footer p {
 }
 
 .error-message {
-  text-align: left;
+  text-align: center;
   margin-top: 2vh;
 }
 

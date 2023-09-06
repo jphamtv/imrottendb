@@ -2,7 +2,7 @@
 import requests
 
 from environs import Env
-from utils import format_runtime
+from .utils import format_runtime
 
 # Loads environment variables
 env = Env()
