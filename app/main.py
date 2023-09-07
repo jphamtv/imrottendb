@@ -38,6 +38,12 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logging.error(f"An HTTP exception occurred: {exc}")
+    return templates.TemplateResponse("500_error.html", {"request": request}, status_code=exc.status_code)
+
+
 @app.exception_handler(Exception)
 async def internal_server_error(request: Request, exc: Exception):
     logging.error(f"An error occurred: {exc}")
@@ -102,9 +108,6 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
 
 async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str):
     """Execute asynchronous tasks specifically for movies."""
-
-    start_time = time.time()
-
     # Initialize tasks
     boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id)) 
     rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
@@ -130,10 +133,6 @@ async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: s
     justwatch_page = await justwatch_page if justwatch_url else None
     rottentomatoes_scores = await rottentomatoes_scores
     letterboxd_rating = await letterboxd_rating
-
-    end_time = time.time()
-    elapsed_time = round(end_time - start_time, 3)
-    print(f'Original method: {elapsed_time}')
 
     return {
         "imdb_rating": imdb_rating,

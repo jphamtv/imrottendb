@@ -1,7 +1,9 @@
 # scraping.py
 import httpx
+import logging
 
 from bs4 import BeautifulSoup
+from fastapi import HTTPException
 from unidecode import unidecode
 
 
@@ -26,10 +28,17 @@ HEADERS = {
 
 
 async def make_request(url, headers=None):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers, timeout=10, follow_redirects=True)
-
-        return BeautifulSoup(response.content, "html.parser")
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, timeout=10, follow_redirects=True)
+            response.raise_for_status()
+            return BeautifulSoup(response.content, "html.parser")
+    except httpx.RequestError as exc:
+        logging.error(f"HTTPX Request Error: {exc}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    except Exception as generic_exc:
+        logging.error(f"Generic Exception: {generic_exc}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 async def get_rottentomatoes_url(title, year, media_type):
