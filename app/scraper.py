@@ -17,31 +17,62 @@ BASE_URLS = {
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) "
-        "Gecko/20100101 Firefox/12.0"
+        "Mozilla/5.0 (X11; Linux x86_64; rv:12.0) " "Gecko/20100101 Firefox/12.0"
     ),
     "Accept-Language": "en-US",
     "Accept-Encoding": "gzip, deflate",
     "Accept": "text/html",
-    "Referer": "https://www.google.com"
+    "Referer": "https://www.google.com",
 }
 
 
 async def make_request(url, headers=None):
+    """
+    Make an asynchronous HTTP GET request and parse the content with BeautifulSoup.
+
+    Parameters:
+    - url (str): The URL to request.
+    - headers (dict, optional): Any HTTP headers to include in the request.
+
+    Returns:
+    - BeautifulSoup object: The HTML content of the response parsed by BeautifulSoup.
+
+    Raises:
+    - HTTPException: If the request fails or returns a non-2xx HTTP status code.
+
+    """
+
     try:
+        # Create an asynchronous HTTP client
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, timeout=10, follow_redirects=True)
+            # Make the HTTP GET request
+            response = await client.get(
+                url, headers=headers, timeout=15, follow_redirects=True
+            )
+
+            # Check that the request was successful (status code 2xx)
             response.raise_for_status()
+
+            # Parse the HTML content of the response with BeautifulSoup
             return BeautifulSoup(response.content, "html.parser")
+
     except httpx.RequestError as exc:
+        # Log any exception specific to HTTPX
         logging.error(f"HTTPX Request Error: {exc}")
+
+        # Raise a FastAPI HTTPException with a 500 status code
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
     except Exception as generic_exc:
+        # Log any other generic exceptions
         logging.error(f"Generic Exception: {generic_exc}")
+
+        # Raise a FastAPI HTTPException with a 500 status code
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 async def get_rottentomatoes_url(title, year, media_type):
+    """Extract the RottenTomatoes URL for the title"""
     title = unidecode(title)
     year = year[:4]
     search_url = f"{BASE_URLS['rottentomatoes']}{title.replace(' ', '%20')}"
@@ -54,13 +85,14 @@ async def get_rottentomatoes_url(title, year, media_type):
     if search_result:
         url_tag = search_result.find("a", {"data-qa": "thumbnail-link"})
         rottentomatoes_url = url_tag["href"]
-
         return rottentomatoes_url
+
     else:
         return None
-    
+
 
 async def get_letterboxd_url(title, year):
+    """Extract the Letterboxd URL for the movie"""
     search_url = f"{BASE_URLS['letterboxd']}{title.replace(' ', '+')}/"
     soup = await make_request(search_url, HEADERS)
     search_results = soup.find_all("span", {"class": "film-title-wrapper"})
@@ -74,11 +106,12 @@ async def get_letterboxd_url(title, year):
             href = result.find("a")["href"]
 
             return f"https://letterboxd.com{href}"
-        
+
     return None
 
 
 async def get_commonsense_info(title, year):
+    """Extract the title's specific URL page and age rating"""
     search_url = f"{BASE_URLS['commonsensemedia']}{title.replace(' ', '%20')}"
     soup = await make_request(search_url, HEADERS)
     search_results = soup.find_all("div", {"class": "site-search-teaser"})
@@ -86,7 +119,7 @@ async def get_commonsense_info(title, year):
     for result in search_results:
         year_element = result.find("div", class_="review-product-summary")
 
-        # If year matches, get the href from the parent <a> tag
+        # If year matches, get the href and age ratiing
         if year_element and year_element.text.strip()[-5:-1] == year:
             href = result.find("a")["href"]
             rating_age = result.find("span", {"class": "rating__age"}).text.strip()
@@ -95,70 +128,79 @@ async def get_commonsense_info(title, year):
                 "url": f"https://www.commonsensemedia.org{href}",
                 "rating": rating_age,
             }
-        
+
     return None
 
 
 async def get_imdb_rating(imdb_id):
-    imdb_url = f"{BASE_URLS['imdb']}{imdb_id}"
-    soup = await make_request(imdb_url, HEADERS)
+    """Extract the average user rating"""
+    if imdb_id:
+        imdb_url = f"{BASE_URLS['imdb']}{imdb_id}"
+        soup = await make_request(imdb_url, HEADERS)
 
-    # Locate the class that contains the IMDb Rating
-    rating = soup.find(
-        "div", {"data-testid": "hero-rating-bar__aggregate-rating__score"}
-    )
+        # Locate the class that contains the IMDb Rating
+        rating = soup.find(
+            "div", {"data-testid": "hero-rating-bar__aggregate-rating__score"}
+        )
 
-    return rating.text[:-3] if rating else None
+        return rating.text[:-3] if rating else None
+    
+    else:
+        return None
 
 
 async def get_boxofficemojo_url(imdb_id):
     boxofficemojo_url = f"{BASE_URLS['boxofficemojo']}{imdb_id}/"
-    
+
     return boxofficemojo_url
 
 
 async def get_box_office_amounts(imdb_id):
-    url = f"{BASE_URLS['boxofficemojo']}{imdb_id}/"
-    soup = await make_request(url, HEADERS)
-    # Locate the span element that contains the Box Office amounts
-    span_elements = soup.find_all("span", class_="a-size-medium a-text-bold")
-    dollar_amounts = [span.get_text(strip=True) for span in span_elements]
+    """Extract box office amounts"""
+    if imdb_id:
+        url = f"{BASE_URLS['boxofficemojo']}{imdb_id}/"
+        soup = await make_request(url, HEADERS)
+        # Locate the span element that contains the Box Office amounts
+        span_elements = soup.find_all("span", class_="a-size-medium a-text-bold")
+        dollar_amounts = [span.get_text(strip=True) for span in span_elements]
 
-    return dollar_amounts
+        return dollar_amounts
+    
+    else:
+        return None
 
 
 async def get_justwatch_page(justwatch_url):
-    """Get the JustWatch page url for 'US'"""
+    """Extract the JustWatch page url for 'US'"""
     if justwatch_url:
         soup = await make_request(justwatch_url, HEADERS)
 
         try:
-            link = soup.find('div', class_='homepage')
+            link = soup.find("div", class_="homepage")
         except AttributeError:
             link = None
 
-        return link.find('a')['href'] if link else None
+        return link.find("a")["href"] if link else None
 
 
 async def get_rottentomatoes_scores(rottentomatoes_url):
+    """Extract Tomotometer and Audience Scores"""
     if not rottentomatoes_url:
         return None
-    
+
     soup = await make_request(rottentomatoes_url, HEADERS)
     # Get the element that contains the Tomatometer and Audience scores
     score_board = soup.find("score-board")
 
     if not score_board:
         return None
-    
-    # Get the Tomatometer and Audience scores, append '%' for display purposes
+
+    # Get the Tomatometer and Audience scores
     tomatometer = (
-        f'{score_board["tomatometerscore"]}%'
-        if score_board["tomatometerscore"]
-        else None
+        score_board["tomatometerscore"] if score_board["tomatometerscore"] else None
     )
     audience_score = (
-        f'{score_board["audiencescore"]}%' if score_board["audiencescore"] else None
+        score_board["audiencescore"] if score_board["audiencescore"] else None
     )
 
     return {
@@ -170,9 +212,10 @@ async def get_rottentomatoes_scores(rottentomatoes_url):
 
 
 async def get_letterboxd_rating(letterboxd_url):
+    """Extract the average user rating"""
     if not letterboxd_url:
         return None
-    
+
     soup = await make_request(letterboxd_url, HEADERS)
 
     # Locate the class that contains the Tomatometer and Audience scores

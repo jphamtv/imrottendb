@@ -13,13 +13,16 @@
     <h3>{{ details.title }}</h3>
     {% if details.certifcation and details.runtime %}
     <div><span class='certification'>{{ details.certifcation }}</span>{{ details.year }} • {{ details.runtime }}</div>
-    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif
+      %}</div>
     {% elif details.runtime and not details.certification %}
     <div>{{ details.year }} • {{ details.runtime }}</div>
-    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif
+      %}</div>
     {% else %}
     <div>{{ details.year }}</div>
-    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif %}</div>
+    <div>Director: {{ details.director[0] }}{% if details.director[1] %}<span>, {{ details.director[1]}}</span>{% endif
+      %}</div>
     {% endif %}
     {% if commonsense_info %}
     <a href="{{ commonsense_info['url'] }}" target="_blank" rel="noopener noreferrer">
@@ -57,18 +60,18 @@
 <a href="{{ rottentomatoes_url }}" target="_blank" rel="noopener noreferrer">
   <div class="rottentomatoes-container card">
     <div class="tomatometer-wrapper">
-      <div class="rating-box-wrapper">
+      <div class="rating-box-wrapper-rt">
         {% if rottentomatoes_scores.tomatometer_state == 'certified-fresh' %}
-        <img src="/static/img/certified_fresh.svg" class="rating-image">
+        <img src="/static/img/certified_fresh.svg" class="rating-image-rt">
         {% elif rottentomatoes_scores.tomatometer_state == 'fresh' %}
-        <img src="/static/img/tomatometer-fresh.svg" class="rating-image">
+        <img src="/static/img/tomatometer-fresh.svg" class="rating-image-rt">
         {% elif rottentomatoes_scores.tomatometer_state == 'rotten' %}
-        <img src="/static/img/tomatometer-rotten.svg" class="rating-image">
+        <img src="/static/img/tomatometer-rotten.svg" class="rating-image-rt">
         {% else %}
-        <img src="/static/img/tomatometer-empty.svg" class="rating-image">
+        <img src="/static/img/tomatometer-empty.svg" class="rating-image-rt">
         {% endif %}
         {% if rottentomatoes_scores.tomatometer %}
-        <p class="rating">{{ rottentomatoes_scores.tomatometer }}</p>
+        <p class="rating">{{ rottentomatoes_scores.tomatometer }}%</p>
         {% else %}
         <p class="no_rating">--</p>
         {% endif %}
@@ -76,16 +79,16 @@
       <p class="label">Tomatometer</p>
     </div>
     <div class="audiencescore-wrapper">
-      <div class="rating-box-wrapper">
+      <div class="rating-box-wrapper-rt">
         {% if rottentomatoes_scores.audience_state == 'upright' %}
-        <img src="/static/img/aud_score-fresh.svg" class="rating-image">
+        <img src="/static/img/aud_score-fresh.svg" class="rating-image-rt">
         {% elif rottentomatoes_scores.audience_state == 'spilled' %}
-        <img src="/static/img/aud_score-rotten.svg" class="rating-image">
+        <img src="/static/img/aud_score-rotten.svg" class="rating-image-rt">
         {% else %}
-        <img src="/static/img/aud_score-empty.svg" class="rating-image">
+        <img src="/static/img/aud_score-empty.svg" class="rating-image-rt">
         {% endif %}
         {% if rottentomatoes_scores.audience_score %}
-        <p class="rating">{{ rottentomatoes_scores.audience_score }}</p>
+        <p class="rating">{{ rottentomatoes_scores.audience_score }}%</p>
         {% else %}
         <p class="no_rating">--</p>
         {% endif %}
@@ -117,15 +120,17 @@
     <div class="letterbxd-wrapper card">
       <div class="rating-box-wrapper">
         {% if letterboxd_rating %}
+        <img src="/static/img/star-letterboxd.svg" class="rating-image">
         <p class="rating">{{ letterboxd_rating }}<span class="rating-scale">/5</span></p>
         {% else %}
+        <img src="/static/img/star-letterboxd-empty.svg" class="rating-image">
         <p class="no_rating">--</p>
         {% endif %}
       </div>
       <p class="label">Letterboxd</p>
     </div>
   </a>
-  {% endif %}  
+  {% endif %}
 </div>
 
 {% if media_type == 'Movie' %}
@@ -176,7 +181,6 @@
   {% endif %}
   {% endif %}
   <a href="javascript:history.back()">
-  <!-- <a href="{{ url_for('search') }}"> -->
     <div class="button">
       <span>Back to Results</span>
     </div>

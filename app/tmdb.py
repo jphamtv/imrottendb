@@ -14,6 +14,7 @@ TMDB_API_KEY = env.str("TMDB_API_KEY")
 
 # --------- SEARCH FOR MOVIE OR TV SERIES -------------- #
 
+
 def search_title(user_input):
     """Look up movie, TV shows, and people using the TMDB API"""
     title = user_input.replace(" ", "%20")
@@ -25,8 +26,12 @@ def search_title(user_input):
 
 
 def get_search_results(url):
-    # Call API and get JSON data
+    """Make an HTTP GET request to TMDB API and return JSON data"""
+
+    # Make the HTTP GET request
     response = requests.get(url)
+
+    # Check that the request was successful (status code 2xx)
     response.raise_for_status()
 
     return response.json()
@@ -75,7 +80,7 @@ def get_filtered_results(result, media_type, tmdb_id, poster_img):
             "media_type": media_type.title(),
             "poster_img": poster_img,
         }
-    
+
     elif media_type == "tv":
         return {
             "tmdb_id": tmdb_id,
@@ -87,6 +92,7 @@ def get_filtered_results(result, media_type, tmdb_id, poster_img):
 
 
 # --------- SEARCH TITLE DETAILS -------------- #
+
 
 def get_media_details(tmdb_id, media_type, TMDB_API_KEY):
     """Fetch the details of the selected title details using the TMDB API"""
@@ -161,9 +167,8 @@ def get_certification(media_details):
                 certification = release_date["certification"]
 
                 if certification:
-
                     return certification
-                
+
     return None
 
 

@@ -403,6 +403,11 @@ footer p {
 
 .rating-box-wrapper {
   display: flex;
+  align-items: start;
+}
+
+.rating-box-wrapper-rt {
+  display: flex;
   align-items: center;
 }
 
@@ -535,6 +540,12 @@ footer p {
 
 .rating-image {
   height: 1.5rem;
+  width: auto;
+  margin-right: 3px;
+}
+
+.rating-image-rt {
+  height: 1.75rem;
   width: auto;
   margin-right: 3px;
 }

@@ -1,7 +1,6 @@
 # main.py
 import asyncio
 import logging
-import time
 
 from environs import Env
 from fastapi import FastAPI, Form, HTTPException, Request
@@ -41,13 +40,17 @@ templates = Jinja2Templates(directory="app/templates")
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     logging.error(f"An HTTP exception occurred: {exc}")
-    return templates.TemplateResponse("500_error.html", {"request": request}, status_code=exc.status_code)
+    return templates.TemplateResponse(
+        "500_error.html", {"request": request}, status_code=exc.status_code
+    )
 
 
 @app.exception_handler(Exception)
 async def internal_server_error(request: Request, exc: Exception):
     logging.error(f"An error occurred: {exc}")
-    return templates.TemplateResponse("500_error.html", {"request": request}, status_code=500)
+    return templates.TemplateResponse(
+        "500_error.html", {"request": request}, status_code=500
+    )
 
 
 @app.get("/")
@@ -68,20 +71,23 @@ def search(request: Request, title: str = Form(None)):
             if user_input:
                 search_results = search_title(user_input)
     except Exception:
-            raise HTTPException(status_code=500)
+        raise HTTPException(status_code=500)
 
-    return templates.TemplateResponse("search.html", {
-        "request": request, 
-        "search_results": search_results,
-        "title": title,
-    })
+    return templates.TemplateResponse(
+        "search.html",
+        {
+            "request": request,
+            "search_results": search_results,
+            "title": title,
+        },
+    )
 
 
 @app.get("/details/{tmdb_id}/{media_type}/")
 async def title_details(request: Request, tmdb_id: str, media_type: str):
     """Display detailed information and ratings for the selected title"""
 
-    # Fetch title details 
+    # Fetch title details
     details = get_title_details(tmdb_id, media_type, TMDB_API_KEY)
     title = details["title"]
     year = details["year"]
@@ -91,40 +97,51 @@ async def title_details(request: Request, tmdb_id: str, media_type: str):
 
     # Movie specific tasks
     if media_type == "Movie":
-        tasks = await execute_movie_tasks(imdb_id, title, year, media_type, justwatch_url)
+        tasks = await execute_movie_tasks(
+            imdb_id, title, year, media_type, justwatch_url
+        )
 
     # TV show specific tasks
     elif media_type == "TV":
         tasks = await execute_tv_tasks(imdb_id, title, year, media_type, justwatch_url)
 
-    return templates.TemplateResponse("details.html", {
-        "request": request,
-        "details": details,
-        "imdb_url": imdb_url,
-        "media_type": media_type,
-        **tasks,
-    })
+    return templates.TemplateResponse(
+        "details.html",
+        {
+            "request": request,
+            "details": details,
+            "imdb_url": imdb_url,
+            "media_type": media_type,
+            **tasks,
+        },
+    )
 
 
-async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str):
+async def execute_movie_tasks(
+    imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str
+):
     """Execute asynchronous tasks specifically for movies."""
     # Initialize tasks
-    boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id)) 
-    rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
+    boxofficemojo_url = asyncio.create_task(get_boxofficemojo_url(imdb_id))
+    rottentomatoes_url = asyncio.create_task(
+        get_rottentomatoes_url(title, year, media_type)
+    )
     letterboxd_url = asyncio.create_task(get_letterboxd_url(title, year))
     justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
-    box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id)) 
+    box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id))
     imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
     commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
 
-    # Await Rottentomatoes task and fetch scores immediately after URL is fetched
+    # Fetch scores immediately after URL is fetched
     rottentomatoes_url = await rottentomatoes_url
-    rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
+    rottentomatoes_scores = asyncio.create_task(
+        get_rottentomatoes_scores(rottentomatoes_url)
+    )
 
-    # Await Letterboxd URL task and fetch rating immediately after URL is fetched
+    # Fetch rating immediately after URL is fetched
     letterboxd_url = await letterboxd_url
     letterboxd_rating = asyncio.create_task(get_letterboxd_rating(letterboxd_url))
-    
+
     # Await tasks
     imdb_rating = await imdb_rating
     boxofficemojo_url = await boxofficemojo_url
@@ -143,21 +160,27 @@ async def execute_movie_tasks(imdb_id: str, title: str, year: str, media_type: s
         "commonsense_info": commonsense_info,
         "boxofficemojo_url": boxofficemojo_url,
         "box_office_amounts": box_office_amounts,
-        "justwatch_page": justwatch_page,   
+        "justwatch_page": justwatch_page,
     }
 
 
-async def execute_tv_tasks(imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str):
+async def execute_tv_tasks(
+    imdb_id: str, title: str, year: str, media_type: str, justwatch_url: str
+):
     """Execute asynchronous tasks specifically for TV shows."""
     # Initialize async tasks
     justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
-    rottentomatoes_url = asyncio.create_task(get_rottentomatoes_url(title, year, media_type))
-    imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))   
+    rottentomatoes_url = asyncio.create_task(
+        get_rottentomatoes_url(title, year, media_type)
+    )
+    imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
     commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
 
-    # Await Rottentomatoes task and fetch scores immediately after URL is fetched
+    # Fetch scores immediately after URL is fetched
     rottentomatoes_url = await rottentomatoes_url
-    rottentomatoes_scores = asyncio.create_task(get_rottentomatoes_scores(rottentomatoes_url))
+    rottentomatoes_scores = asyncio.create_task(
+        get_rottentomatoes_scores(rottentomatoes_url)
+    )
 
     # Await tasks
     imdb_rating = await imdb_rating
@@ -170,7 +193,7 @@ async def execute_tv_tasks(imdb_id: str, title: str, year: str, media_type: str,
         "rottentomatoes_url": rottentomatoes_url,
         "rottentomatoes_scores": rottentomatoes_scores,
         "commonsense_info": commonsense_info,
-        "justwatch_page": justwatch_page,   
+        "justwatch_page": justwatch_page,
         "letterboxd_url": None,
         "letterboxd_rating": None,
         "boxofficemojo_url": None,
@@ -180,4 +203,5 @@ async def execute_tv_tasks(imdb_id: str, title: str, year: str, media_type: str,
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
