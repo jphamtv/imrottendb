@@ -19,7 +19,7 @@ ReelRatingsDB is a comprehensive movie ratings aggregator designed to provide us
 During the development of ReelRatingsDB, several design choices were made to ensure efficiency and user-friendliness:
 
 - **FAST API Framework**: A modern, high-speed web framework was chosen for its efficiency in building APIs using Python. FAST API which is optimal for asynchronous programming, and helped improve performance, getting data up to three times faster. 
-**BeautifulSoup for Web Scraping**: This Python library was selected for its robustness, reliabilty, and ease of use in scraping web content.
+- **BeautifulSoup for Web Scraping**: This Python library was selected for its robustness, reliabilty, and ease of use in scraping web content.
 - **TMDB API**: The decision to use TMDB API was based on its comprehensive movie database and reliable data retrieval methods. Initially used OMDB API but the search was subpar in comparison.
 
 ## Conclusion
