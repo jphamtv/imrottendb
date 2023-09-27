@@ -110,24 +110,44 @@ async def get_letterboxd_url(title, year):
     return None
 
 
-async def get_commonsense_info(title, year):
+async def get_commonsense_info(title, year, media_type):
     """Extract the title's specific URL page and age rating"""
     search_url = f"{BASE_URLS['commonsensemedia']}{title.replace(' ', '%20')}"
     soup = await make_request(search_url, HEADERS)
     search_results = soup.find_all("div", {"class": "site-search-teaser"})
 
     for result in search_results:
-        year_element = result.find("div", class_="review-product-summary")
+        product_type_element = result.find("div", class_="review-product-type caption")
+        product_type = (
+            product_type_element.text.strip()
+            if product_type_element is not None
+            else None
+        )
+
+        if product_type != media_type.upper():
+            continue
 
         # If year matches, get the href and age ratiing
-        if year_element and year_element.text.strip()[-5:-1] == year:
-            href = result.find("a")["href"]
-            rating_age = result.find("span", {"class": "rating__age"}).text.strip()
+        year_element = result.find("div", class_="review-product-summary")
+        if year_element and year_element.text.strip()[-5:-1] != year:
+            continue
 
-            return {
-                "url": f"https://www.commonsensemedia.org{href}",
-                "rating": rating_age,
-            }
+        rating_age_element = result.find("span", {"class": "rating__age"})
+        rating_age = (
+            rating_age_element.text.strip() if rating_age_element is not None else None
+        )
+        if not rating_age:
+            continue
+
+        a_element = result.find("a")
+        href = a_element["href"] if a_element is not None else None
+        if not href:
+            continue
+
+        return {
+            "url": f"https://www.commonsensemedia.org{href}",
+            "rating": rating_age,
+        }
 
     return None
 
@@ -144,7 +164,7 @@ async def get_imdb_rating(imdb_id):
         )
 
         return rating.text[:-3] if rating else None
-    
+
     else:
         return None
 
@@ -165,7 +185,7 @@ async def get_box_office_amounts(imdb_id):
         dollar_amounts = [span.get_text(strip=True) for span in span_elements]
 
         return dollar_amounts
-    
+
     else:
         return None
 

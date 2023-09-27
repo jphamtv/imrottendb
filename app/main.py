@@ -130,7 +130,7 @@ async def execute_movie_tasks(
     justwatch_page = asyncio.create_task(get_justwatch_page(justwatch_url))
     box_office_amounts = asyncio.create_task(get_box_office_amounts(imdb_id))
     imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
-    commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
+    commonsense_info = asyncio.create_task(get_commonsense_info(title, year, media_type))
 
     # Fetch scores immediately after URL is fetched
     rottentomatoes_url = await rottentomatoes_url
@@ -174,7 +174,7 @@ async def execute_tv_tasks(
         get_rottentomatoes_url(title, year, media_type)
     )
     imdb_rating = asyncio.create_task(get_imdb_rating(imdb_id))
-    commonsense_info = asyncio.create_task(get_commonsense_info(title, year))
+    commonsense_info = asyncio.create_task(get_commonsense_info(title, year, media_type))
 
     # Fetch scores immediately after URL is fetched
     rottentomatoes_url = await rottentomatoes_url
