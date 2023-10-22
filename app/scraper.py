@@ -210,7 +210,7 @@ async def get_rottentomatoes_scores(rottentomatoes_url):
 
     soup = await make_request(rottentomatoes_url, HEADERS)
     # Get the element that contains the Tomatometer and Audience scores
-    score_board = soup.find("score-board")
+    score_board = soup.find("score-board-deprecated")
 
     if not score_board:
         return None

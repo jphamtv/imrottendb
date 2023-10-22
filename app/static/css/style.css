@@ -115,7 +115,7 @@ a:visited {
 }
 
 .logo {
-  height: 2rem;
+  height: 2.25rem;
   width: auto;
 }
 
@@ -186,6 +186,7 @@ footer p {
 
 .homepage-tagline {
   font-size: 1rem;
+  letter-spacing: .05rem;
   text-align: center;
   margin-bottom: 1.75rem;
   color: #FAAD00;
