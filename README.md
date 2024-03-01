@@ -3,6 +3,8 @@
 ## Introduction
 ReelRatings is a comprehensive movie ratings aggregator designed to provide users with a holistic view of movie and TV show ratings from multiple sources. Built with modern web technologies, this tool aims to simplify the process of finding reliable and aggregated ratings.
 
+Live Demo: www.reelratingsdb.com
+
 ## Features
 - **Search Functionality**: Users can search for a movie or TV show title.
 - **Aggregated Data**: Upon selecting a title, the app fetches detailed information, including ratings, specific movie page URLs, box office figures, and stream availability.
