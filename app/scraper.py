@@ -1,5 +1,6 @@
 # scraping.py
 import httpx
+import json
 import logging
 
 from bs4 import BeautifulSoup
@@ -208,26 +209,45 @@ async def get_rottentomatoes_scores(rottentomatoes_url):
     if not rottentomatoes_url:
         return None
 
+    # Get the script element that contains the Tomatometer and Audience scores
     soup = await make_request(rottentomatoes_url, HEADERS)
-    # Get the element that contains the Tomatometer and Audience scores
-    score_board = soup.find("score-board-deprecated")
+    script_tag = soup.find("script", {"id": "media-scorecard-json"})
 
-    if not score_board:
+    if not script_tag:
         return None
 
-    # Get the Tomatometer and Audience scores
-    tomatometer = (
-        score_board["tomatometerscore"] if score_board["tomatometerscore"] else None
-    )
-    audience_score = (
-        score_board["audiencescore"] if score_board["audiencescore"] else None
-    )
+    # Convert data string to dictionary
+    json_data = json.loads(script_tag.string)
+
+    # Get the Tomatometer and Audience Score objects
+    tomatometer = json_data["criticsScore"] if "criticsScore" in json_data else None
+    audience_score = json_data["audienceScore"] if "audienceScore" in json_data else None
+
+    tomatometer_state = None
+    audience_state = None
+
+    if tomatometer:
+        if tomatometer["certified"] == True and tomatometer["sentiment"] == "POSITIVE":
+            tomatometer_state = "certified-fresh"
+        elif tomatometer["certified"] == False and tomatometer["sentiment"] == "POSITIVE":
+            tomatometer_state = "fresh"
+        elif tomatometer["certified"] == False and tomatometer["sentiment"] == "NEGATIVE":
+            tomatometer_state = "rotten"
+
+    if audience_score:
+        if audience_score["sentiment"] == "POSITIVE":
+            audience_state = "upright"
+        elif audience_score["sentiment"] == "NEGATIVE":
+            audience_state = "spilled"
+
+    if tomatometer is None and audience_score is None:
+        return None
 
     return {
-        "tomatometer": tomatometer,
-        "tomatometer_state": score_board["tomatometerstate"],
-        "audience_score": audience_score,
-        "audience_state": score_board["audiencestate"],
+        "tomatometer": tomatometer["score"] if tomatometer else None,
+        "tomatometer_state": tomatometer_state,
+        "audience_score": audience_score["score"] if audience_score else None,
+        "audience_state": audience_state,
     }
 
 
